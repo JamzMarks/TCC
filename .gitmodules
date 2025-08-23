@@ -1,0 +1,9 @@
+[submodule "YOLOPresentation"]
+	path = YOLOPresentation
+	url = https://github.com/JamzMarks/YOLOPresentation.git
+[submodule "TCC_user_ms"]
+	path = TCC_user_ms
+	url = https://github.com/JamzMarks/TCC_user_ms.git
+[submodule "TCC_Dashboard"]
+	path = TCC_Dashboard
+	url = https://github.com/JamzMarks/TCC_Dashboard.git
