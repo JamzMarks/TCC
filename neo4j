@@ -1,0 +1,61 @@
+neo4j para acessar o banco e xml.etree.ElementTree para gerar o XML.
+
+pip install neo4j
+
+
+
+from neo4j import GraphDatabase
+import xml.etree.ElementTree as ET
+
+# --- Configuração do Neo4j ---
+uri = "bolt://localhost:7687"
+user = "neo4j"
+password = "senha_do_seu_banco"
+
+driver = GraphDatabase.driver(uri, auth=(user, password))
+
+# --- Consultas Cypher ---
+QUERY_NODES = "MATCH (n:Node) RETURN n.id AS id, n.lat AS lat, n.lon AS lon"
+QUERY_EDGES = """
+MATCH (n1:Node)-[r:ROAD]->(n2:Node)
+RETURN r.edge_id AS edge_id, r.road_id AS road_id, r.name AS name,
+       r.direction AS direction, r.flow AS flow,
+       n1.id AS from_node, n2.id AS to_node
+"""
+
+# --- Funções de exportação ---
+def fetch_nodes(tx):
+    return list(tx.run(QUERY_NODES))
+
+def fetch_edges(tx):
+    return list(tx.run(QUERY_EDGES))
+
+def export_to_sumo(nodes, edges, filename="map.net.xml"):
+    root = ET.Element("nodes_and_edges")  # root custom, SUMO aceita <nodes> e <edges> separados
+
+    nodes_el = ET.SubElement(root, "nodes")
+    for node in nodes:
+        ET.SubElement(nodes_el, "node", id=node["id"], x=str(node["lon"]), y=str(node["lat"]))
+
+    edges_el = ET.SubElement(root, "edges")
+    for edge in edges:
+        ET.SubElement(
+            edges_el,
+            "edge",
+            id=edge["edge_id"],
+            from_node=edge["from_node"],
+            to_node=edge["to_node"],
+            name=edge["name"],
+            direction=edge["direction"],
+            flow=str(edge["flow"])
+        )
+
+    tree = ET.ElementTree(root)
+    tree.write(filename, encoding="utf-8", xml_declaration=True)
+    print(f"Arquivo {filename} gerado com sucesso!")
+
+# --- Execução ---
+with driver.session() as session:
+    nodes = session.read_transaction(fetch_nodes)
+    edges = session.read_transaction(fetch_edges)
+    export_to_sumo(nodes, edges)
