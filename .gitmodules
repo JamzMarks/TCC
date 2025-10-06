@@ -8,7 +8,7 @@
 	path = web
 	url = https://github.com/JamzMarks/Dashboard.git
 [submodule "TCC_devices_ms"]
-	path = TCC_user_ms
+	path = TCC_devices_ms
 	url = https://github.com/JamzMarks/tcc_devices.git
 [submodule "TCC_audit_ms"]
 	path = TCC_audit_ms	
