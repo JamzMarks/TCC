@@ -12,5 +12,5 @@
 	url = https://github.com/JamzMarks/tcc_devices.git
 [submodule "TCC_audit_ms"]
 	path = TCC_audit_ms	
-	url = https://github.com/JamzMarks/tcc_metrics.git
+	url = https://github.com/JamzMarks/tcc_audit.git
 
