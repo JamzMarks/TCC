@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public"]
+}
+
+model User {
+  id         String      @id @default(uuid())
+  email      String      @unique
+  firstName  String
+  lastName   String
+  password   String
+  role       Roles       @default(USER)
+  isActive   Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  avatar     String?
+  UserConfig UserConfig?
+
+  @@schema("public")
+}
+
+model UserConfig {
+  id       String   @id @default(uuid())
+  userId   String   @unique
+  language Language @default(EN)
+  theme    Theme    @default(LIGHT)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@schema("public")
+}
+
+model FilesLogs {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String
+  email       String
+  operation   FileOperation
+  fileName    String?
+  fileSize    Int?
+  fileType    String?
+  folderId    String?
+  level       LogLevel      @default(INFO)
+  description String?
+  createdAt   DateTime      @default(now())
+
+  @@index([createdAt])
+  @@index([operation])
+  @@index([userId])
+  @@schema("public")
+}
+
+model UserLogs {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email       String
+  createdAt   DateTime      @default(now())
+  description String?
+  ipAddress   String?
+  level       LogLevel      @default(INFO)
+  operation   UserOperation
+  userAgent   String?
+  userId      String
+
+  @@index([createdAt])
+  @@index([operation])
+  @@index([userId])
+  @@schema("public")
+}
+
+model UserSecurityLogs {
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String
+  email       String
+  operation   SecurityOperation
+  level       LogLevel          @default(INFO)
+  description String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime          @default(now())
+
+  @@index([createdAt])
+  @@index([operation])
+  @@index([userId])
+  @@schema("public")
+}
+
+enum Roles {
+  USER
+  ADMIN
+  ENGINEER
+  AUDITOR
+
+  @@schema("public")
+}
+
+enum Theme {
+  LIGHT
+  DARK
+
+  @@schema("public")
+}
+
+enum Language {
+  PTBR
+  EN
+  ES
+
+  @@schema("public")
+}
+
+enum FileOperation {
+  INSERT
+  DELETED
+  UPDATED
+
+  @@schema("public")
+}
+
+enum LogLevel {
+  INFO
+  WARN
+  ERROR
+
+  @@schema("public")
+}
+
+enum SecurityOperation {
+  MFA_ENABLED
+  MFA_DISABLED
+  ROLE_CHANGED
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  LOGIN_ATTEMPT
+  PASSWORD_CHANGED
+
+  @@schema("public")
+}
+
+enum UserOperation {
+  LOGIN
+  LOGOUT
+  CREATED
+  UPDATED
+  DELETED
+
+  @@schema("public")
+}
