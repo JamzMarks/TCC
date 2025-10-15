@@ -44,7 +44,7 @@ export class AuthController {
     return await this.authService.signin(loginDto, res);
   }
 
-  @Post('me')
+  @Get('me')
   @Version('1')
   @ApiResponse({ status: 200, description: 'Return user data.' })
   async me(

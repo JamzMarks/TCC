@@ -55,7 +55,7 @@ export class AuthService {
     const access_token = res.req.cookies['access_token'];
     if (!access_token) throw new UnauthorizedException('No access token');
 
-    const isValid = await this.validateRefreshToken(access_token);
+    const isValid = await this.validateToken(access_token);
     if (!isValid) {
       throw new UnauthorizedException('Invalid access token');
     }
@@ -66,12 +66,19 @@ export class AuthService {
       where: { id: decoded.sub },
     });
     if (!user) {
+      console.log('o erro ocorreu aqui')
       throw new UnauthorizedException('User not found');
     }
-    const payload = this.buildTokenPayload(user);
-    return {
-      user: payload,
-    };
+    const userRes = {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      avatar: user.avatar,
+      email: user.email
+
+    }
+    return userRes;
   } 
 
   async updateUserPassword(
@@ -121,6 +128,12 @@ export class AuthService {
     const { access_token } = await this.generateTokens(payload);
 
     return access_token;
+  }
+
+  private async validateToken(accessToken: string): Promise<Boolean> {
+    return this.jwtService.verifyAsync(accessToken, {
+      secret: process.env.JWT_SECRET,
+    });
   }
 
   private async validateRefreshToken(refreshToken: string): Promise<Boolean> {
