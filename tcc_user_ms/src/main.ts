@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ResponseInterceptor } from '@interceptors/response.interceptor';
 import { readFileSync } from 'fs';
 import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface';

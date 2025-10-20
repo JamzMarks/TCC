@@ -10,6 +10,8 @@ import { hashPassword } from '@utils/HashPassword';
 import { JwtService } from '@nestjs/jwt';
 import { PayloadDto } from '@dtos/auth/payload.dto';
 import { Response } from 'express';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class AuthService {
@@ -43,11 +45,9 @@ export class AuthService {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    
+
     return {
       user: payload,
-      // access_token,
-      // refresh_token,
     };
   }
 
@@ -66,7 +66,7 @@ export class AuthService {
       where: { id: decoded.sub },
     });
     if (!user) {
-      console.log('o erro ocorreu aqui')
+      console.log('o erro ocorreu aqui');
       throw new UnauthorizedException('User not found');
     }
     const userRes = {
@@ -75,11 +75,10 @@ export class AuthService {
       lastName: user.lastName,
       role: user.role,
       avatar: user.avatar,
-      email: user.email
-
-    }
+      email: user.email,
+    };
     return userRes;
-  } 
+  }
 
   async updateUserPassword(
     id: string,
@@ -113,13 +112,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const decoded = await this.jwtService.verifyAsync(refresh_token, {
-      secret: process.env.JWT_REFRESH_SECRET,
-    });
+    const decoded = await this.jwtService.verifyAsync(refresh_token);
 
     const user = await this.prisma.user.findUnique({
       where: { id: decoded.sub },
     });
+
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -128,18 +126,6 @@ export class AuthService {
     const { access_token } = await this.generateTokens(payload);
 
     return access_token;
-  }
-
-  private async validateToken(accessToken: string): Promise<Boolean> {
-    return this.jwtService.verifyAsync(accessToken, {
-      secret: process.env.JWT_SECRET,
-    });
-  }
-
-  private async validateRefreshToken(refreshToken: string): Promise<Boolean> {
-    return this.jwtService.verifyAsync(refreshToken, {
-      secret: process.env.JWT_REFRESH_SECRET,
-    });
   }
 
   private buildTokenPayload(user: any): PayloadDto {
@@ -153,17 +139,58 @@ export class AuthService {
   }
 
   async generateTokens(payload: PayloadDto) {
+    const privateKey = readFileSync(
+      join(__dirname, '../..', 'keys', 'private.pem'),
+      'utf-8',
+    );
+
     const access_token = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_SECRET,
+      algorithm: 'RS256',
+      privateKey,
+      // secret: process.env.JWT_SECRET,
       expiresIn: '15m',
     });
     const refresh_token = await this.jwtService.signAsync(
       { sub: payload.sub },
       {
-        secret: process.env.JWT_REFRESH_SECRET,
+        algorithm: 'RS256',
+        privateKey,
+        // secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: '7d',
       },
     );
     return { access_token, refresh_token };
+  }
+
+  private async validateToken(accessToken: string): Promise<Boolean> {
+    const publicKey = readFileSync(
+      join(__dirname, '../..', 'keys', 'public.pem'),
+      'utf-8',
+    );
+    try {
+      await this.jwtService.verifyAsync(accessToken, {
+        publicKey, 
+        algorithms: ['RS256'],
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async validateRefreshToken(refreshToken: string): Promise<Boolean> {
+    const publicKey = readFileSync(
+      join(__dirname, '../..', 'keys', 'public.pem'),
+      'utf-8',
+    );
+    try {
+      await this.jwtService.verifyAsync(refreshToken, {
+        publicKey, 
+        algorithms: ['RS256'],
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
