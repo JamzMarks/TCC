@@ -3,10 +3,12 @@ import { PrismaService } from './prisma.service';
 import { Prisma } from 'generated/prisma';
 import { UserConfigDto } from '@dtos/userConfig/user-config.dto';
 import { CreateUserConfigDto } from '@dtos/userConfig/create-user-config.dto';
+import { AuthService } from './auth.service';
+import { Response } from 'express';
 
 @Injectable()
 export class UserConfigService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly authService: AuthService) {}
 
   async fingUserConfig(id: string): Promise<UserConfigDto> {
     const config = await this.prisma.userConfig.findUnique({
@@ -100,6 +102,25 @@ export class UserConfigService {
           userId,
         },
       });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('User config not found');
+      }
+      throw error;
+    }
+  }
+
+  async me(res: Response): Promise<any> {
+    try {
+      const userRes = await this.authService.me(res);
+      if(!userRes){
+        throw new NotFoundException('User config not found');
+      }
+      const userConfig =  await this.fingUserConfigByUser(userRes.id)
+      return userConfig;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

@@ -69,7 +69,7 @@ export class AuthController {
     return this.authService.updateUserPassword(
       id,
       body.newPassword,
-      body.confirmationPassword,
+      body.oldPassword,
     );
   }
 

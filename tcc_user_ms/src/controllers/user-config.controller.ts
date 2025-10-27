@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Res,
   UseGuards,
   Version,
 } from '@nestjs/common';
@@ -23,10 +24,11 @@ import {
 } from '@nestjs/swagger';
 import { UserConfigService } from '@services/userConfig.service';
 import { UserConfigDto } from '@dtos/userConfig/user-config.dto';
+import { Response } from 'express';
 
 @ApiTags('Users-config')
 @ApiBearerAuth()
-@UseGuards(RolesGuard, AuthGuard, OwnerGuard)
+// @UseGuards(RolesGuard, AuthGuard, OwnerGuard)
 @Controller('Users-config')
 export class UserConfigController {
   constructor(private readonly userConfigService: UserConfigService) {}
@@ -56,5 +58,13 @@ export class UserConfigController {
     @Body() dto: Partial<UserConfigDto>,
   ) {
     return this.userConfigService.updateUserConfigByUserId(id, dto);
+  }
+
+  @Get('me')
+  @Version('1')
+  @ApiResponse({ status: 200, description: 'Return user config data.' })
+  me(@Res({ passthrough: true }) res: Response) {
+    console.log(`ok`);
+    return this.userConfigService.me(res);
   }
 }

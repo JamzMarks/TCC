@@ -12,6 +12,7 @@ import { PayloadDto } from '@dtos/auth/payload.dto';
 import { Response } from 'express';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { UserDto } from '@dtos/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -51,7 +52,7 @@ export class AuthService {
     };
   }
 
-  async me(res: Response): Promise<any> {
+  async me(res: Response): Promise<UserDto> {
     const access_token = res.req.cookies['access_token'];
     if (!access_token) throw new UnauthorizedException('No access token');
 

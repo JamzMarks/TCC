@@ -18,6 +18,7 @@ export class UserDto {
   role: Roles;
 
   @ApiProperty({ required: false, example: 'avatar.jpg', description: 'URL do avatar do usuário' })
-  avatar: string;
+  avatar: string | null;
 
 }
+
