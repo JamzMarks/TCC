@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ResponseInterceptor } from '@interceptors/response.interceptor';
 import { readFileSync } from 'fs';
@@ -18,7 +18,7 @@ async function bootstrap() {
     httpsOptions,
   });
   app.enableCors({
-    origin: ['https://localhost:3000', 'https://tccdashboard.vercel.app'],
+    origin: ['https://localhost:3000', 'https://tailfox.vercel.app/'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
