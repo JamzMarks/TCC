@@ -41,6 +41,7 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
+    console.log('Signin attempt for:', loginDto.email); 
     return await this.authService.signin(loginDto, res);
   }
 
@@ -85,8 +86,8 @@ export class AuthController {
     const access_token = await this.authService.refreshAccessToken(refreshToken);
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 15 * 60 * 1000,
     });
 

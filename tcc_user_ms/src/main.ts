@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import cookieParser from 'cookie-parser';
+import cookieParser = require('cookie-parser');
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ResponseInterceptor } from '@interceptors/response.interceptor';
 import { readFileSync } from 'fs';
@@ -10,18 +10,19 @@ import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.i
 
 async function bootstrap() {
 
-  const httpsOptions: HttpsOptions = {
-    key: readFileSync('./localhost-key.pem'),
-    cert: readFileSync('./localhost.pem'),
-  };
-  const app = await NestFactory.create(AppModule, {
-    httpsOptions,
-  });
-  app.enableCors({
-    origin: ['https://localhost:3000', 'https://tailfox.vercel.app/'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-  });
+  // const httpsOptions: HttpsOptions = {
+  //   key: readFileSync('./localhost-key.pem'),
+  //   cert: readFileSync('./localhost.pem'),
+  // };
+  // const app = await NestFactory.create(AppModule, {
+  //   httpsOptions,
+  // });
+  const app = await NestFactory.create(AppModule);
+  // app.enableCors({
+  //   origin: ['https://localhost:3000', 'https://tailfox.vercel.app'], // ✅ sem "/"
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  //   credentials: true,
+  // });
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.use(cookieParser());
   app.setGlobalPrefix('api');

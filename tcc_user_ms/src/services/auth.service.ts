@@ -33,19 +33,27 @@ export class AuthService {
     const payload = this.buildTokenPayload(user);
     const { access_token, refresh_token } = await this.generateTokens(payload);
 
+    const isProd = process.env.NODE_ENV === 'production';
+    console.log(isProd ? 'Production environment detected. Setting secure cookies.' : 'Development environment detected. Setting non-secure cookies.');
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProd, 
+      sameSite: isProd ? 'none' : 'lax',
+      domain: isProd ? '.tailfox.cloud' : 'localhost',
+      path: '/',
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie('refresh_token', refresh_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      domain: isProd ? '.tailfox.cloud' : 'localhost',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    
 
     return {
       user: payload,
