@@ -120,28 +120,30 @@ export class UserService implements OnModuleInit {
     const email = data.email.toLowerCase();
 
     const existingUser = await this.prisma.user.findUnique({
-      where: { email: data.email },
+      where: { email },
     });
-    if (existingUser) throw new BadRequestException('Email already in use');
+
+    if (existingUser) {
+      throw new BadRequestException('Email already in use');
+    }
+
     const role = data.role ? parseRole(data.role) : Roles.USER;
     const hashedPassword = await hashPassword(data.password);
-    try {
-      const user = await this.prisma.user.create({
-        data: {
-          ...data,
-          email,
-          password: hashedPassword,
-          role: role,
-        },
-      });
-      const userConfig = this.userConfigService.createUserConfig({
-        userId: user.id,
-      } as CreateUserConfigDto);
-      return user;
-    } catch (error) {
-      throw new Error(error);
-    }
-    // this.loggerService.log('Usuário criado', 'info', { action: 'create_user' });
+
+    const user = await this.prisma.user.create({
+      data: {
+        ...data,
+        email,
+        password: hashedPassword,
+        role,
+      },
+    });
+
+    await this.userConfigService.createUserConfig({
+      userId: user.id,
+    } as CreateUserConfigDto);
+
+    return user;
   }
 
   async updateUser(id: string, data: Partial<UserDto>): Promise<User> {

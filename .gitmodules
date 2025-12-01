@@ -2,15 +2,15 @@
 	path = YOLOPresentation
 	url = https://github.com/JamzMarks/YOLOPresentation.git
 [submodule "TCC_user_ms"]
-	path = TCC_user_ms
+	path = TCC_user
 	url = https://github.com/JamzMarks/tcc_ms.git
 [submodule "TCC_admin_panel"]
 	path = web
 	url = https://github.com/JamzMarks/Dashboard.git
 [submodule "TCC_devices_ms"]
-	path = TCC_devices_ms
+	path = tcc_utils
 	url = https://github.com/JamzMarks/tcc_devices.git
 [submodule "TCC_audit_ms"]
-	path = TCC_audit_ms	
+	path = tcc_audit
 	url = https://github.com/JamzMarks/tcc_audit.git
 
